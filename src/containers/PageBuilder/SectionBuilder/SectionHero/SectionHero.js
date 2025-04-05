@@ -6,6 +6,7 @@ import Field, { hasDataInFields } from '../../Field';
 import SectionContainer from '../SectionContainer';
 import css from './SectionHero.module.css';
 
+import SearchForm from '../../../../components/SearchForm/SearchForm';
 /**
  * @typedef {Object} FieldComponentConfig
  * @property {ReactNode} component
@@ -68,6 +69,7 @@ const SectionHero = props => {
           <Field data={title} className={defaultClasses.title} options={fieldOptions} />
           <Field data={description} className={defaultClasses.description} options={fieldOptions} />
           <Field data={callToAction} className={defaultClasses.ctaButton} options={fieldOptions} />
+          <SearchForm/>
         </header>
       ) : null}
     </SectionContainer>

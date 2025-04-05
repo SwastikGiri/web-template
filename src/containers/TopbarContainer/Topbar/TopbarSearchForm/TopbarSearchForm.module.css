@@ -82,7 +82,7 @@
   height: var(--topbarHeightDesktop);
   line-height: unset;
   border: none;
-  padding-top: 0;
+  padding-top: 20px;
   padding-bottom: 0;
   padding-left: 10px;
 
