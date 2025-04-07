@@ -281,6 +281,15 @@ export const listingTypes = [
       payoutDetails: true,
     },
   },
+  {
+    listingType: 'inquiry-with-pet-profile',
+    label: 'Pet Boarding Inquiry',
+    transactionType: {
+      process: 'biketribe-default-inquiry',
+      alias: 'biketribe-default-inquiry/release-1',
+      unitType: 'item', // or 'night', depending on your booking duration style
+    },
+  },
   // // Here are some examples for other listingTypes
   // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   // {
