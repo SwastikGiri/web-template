@@ -660,7 +660,7 @@ class StripePaymentForm extends Component {
               id={`${formId}-message`}
               name="initialMessage"
               label={initialMessageLabel}
-              placeholder={messagePlaceholder}
+              placeholder="pet profile"
               className={css.message}
             />
           </div>

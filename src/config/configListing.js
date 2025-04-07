@@ -287,7 +287,7 @@ export const listingTypes = [
     transactionType: {
       process: 'biketribe-default-inquiry',
       alias: 'biketribe-default-inquiry/release-1',
-      unitType: 'item', // or 'night', depending on your booking duration style
+      unitType: 'day', // or 'night', depending on your booking duration style
     },
   },
   // // Here are some examples for other listingTypes
