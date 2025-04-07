@@ -282,14 +282,20 @@ export const listingTypes = [
     },
   },
   {
-    listingType: 'inquiry-with-pet-profile',
-    label: 'Pet Boarding Inquiry',
+    listingType: 'pet-booking',
+    label: 'Pet Boarding',
     transactionType: {
       process: 'biketribe-default-inquiry',
       alias: 'biketribe-default-inquiry/release-1',
-      unitType: 'day', // or 'night', depending on your booking duration style
+      unitType: 'day',
     },
-  },
+    availabilityType: 'oneSeat',
+    defaultListingFields: {
+      location: true,
+      payoutDetails: true,
+    },
+  }
+  
   // // Here are some examples for other listingTypes
   // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   // {

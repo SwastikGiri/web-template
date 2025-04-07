@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import PetProfileForm from './PetProfileForm'; // adjust the path if needed
 
 import { FormattedMessage, injectIntl, intlShape } from '../../../util/reactIntl';
 import { displayPrice } from '../../../util/configHelpers';
@@ -133,6 +134,11 @@ export class TransactionPanelComponent extends Component {
         // Ignore, Redux handles the error
       });
   }
+  handlePetProfileSubmit(values) {
+    // You can trigger your custom transition here via a prop passed down to this panel.
+    // For now, we just log.
+    console.log('Pet profile submitted:', values);
+  }
 
   scrollToMessage(messageId) {
     const selector = `#msg-${messageId.uuid}`;
@@ -221,6 +227,7 @@ export class TransactionPanelComponent extends Component {
     const showDetailCardHeadings = stateData.showDetailCardHeadings || !hasViewingRights;
 
     const deliveryMethod = protectedData?.deliveryMethod || 'none';
+    const showPetProfileForm = stateData?.processState === 'step2-pet-profile'; // Adjust based on your custom state
 
     const classes = classNames(rootClassName || css.root, className);
 
@@ -317,6 +324,17 @@ export class TransactionPanelComponent extends Component {
               activityFeed={activityFeed}
               isConversation={isInquiryProcess}
             />
+            {showPetProfileForm ? (
+              <div className={css.petProfileFormSection}>
+                <h2 className={css.sectionTitle}>
+                  <FormattedMessage
+                    id="TransactionPanel.petProfileFormHeading"
+                    defaultMessage="Pet Profile"
+                  />
+                </h2>
+                <PetProfileForm onSubmit={values => this.handlePetProfileSubmit(values)} />
+              </div>
+            ) : null}
             {showSendMessageForm ? (
               <SendMessageForm
                 formId={this.sendMessageFormName}

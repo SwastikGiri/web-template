@@ -598,3 +598,16 @@
     margin-top: 16px;
   }
 }
+/* -----------petprofile------------- */
+.petProfileFormSection {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #fefefe;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}

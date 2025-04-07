@@ -1,6 +1,5 @@
 /**
- * Transaction process graph for custom inquiries with pet profile:
- *   - biketribe-default-inquiry
+ * Transaction process graph for biketribe-default-inquiry
  */
 
 export const transitions = {
@@ -33,13 +32,8 @@ export const graph = {
   },
 };
 
-// Determines which transitions to show in ActivityFeed or transaction history
-export const isRelevantPastTransition = transition => {
-  return [
-    transitions.INQUIRE_WITHOUT_PAYMENT,
-    transitions.PROVIDE_PET_DETAILS,
-  ].includes(transition);
-};
+export const isRelevantPastTransition = transition =>
+  [transitions.INQUIRE_WITHOUT_PAYMENT, transitions.PROVIDE_PET_DETAILS].includes(transition);
 
 export const isCustomerReview = () => false;
 export const isProviderReview = () => false;

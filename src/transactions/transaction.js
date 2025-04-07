@@ -2,10 +2,9 @@ import * as log from '../util/log';
 import * as purchaseProcess from './transactionProcessPurchase';
 import * as bookingProcess from './transactionProcessBooking';
 import * as inquiryProcess from './transactionProcessInquiry';
+import * as biketribeDefaultInquiry from './transactionProcessBiketribeDefaultInquiry';
 
-// Supported unit types
-// Note: These are passed to translations/microcopy in certain cases.
-//       Therefore, they can't contain wordbreaks like '-' or space ' '
+// Unit types
 export const ITEM = 'item';
 export const DAY = 'day';
 export const NIGHT = 'night';
@@ -13,24 +12,12 @@ export const HOUR = 'hour';
 export const FIXED = 'fixed';
 export const INQUIRY = 'inquiry';
 
-// Then names of supported processes
+// Process names
 export const PURCHASE_PROCESS_NAME = 'default-purchase';
 export const BOOKING_PROCESS_NAME = 'default-booking';
 export const INQUIRY_PROCESS_NAME = 'default-inquiry';
+export const BIKETRIBE_INQUIRY_PROCESS_NAME = 'biketribe-default-inquiry';
 
-/**
- * A process should export:
- * - graph
- * - states
- * - transitions
- * - isRelevantPastTransition(transition)
- * - isPrivileged(transition)
- * - isCompleted(transition)
- * - isRefunded(transition)
- * - isCustomerReview(transition)
- * - isProviderReview(transition)
- * - statesNeedingCustomerAttention
- */
 const PROCESSES = [
   {
     name: PURCHASE_PROCESS_NAME,
@@ -50,33 +37,18 @@ const PROCESSES = [
     process: inquiryProcess,
     unitTypes: [INQUIRY],
   },
+  {
+    name: BIKETRIBE_INQUIRY_PROCESS_NAME,
+    alias: `${BIKETRIBE_INQUIRY_PROCESS_NAME}/release-1`,
+    process: biketribeDefaultInquiry,
+    unitTypes: [INQUIRY],
+  },
 ];
 
-/**
- * Helper functions to figure out if transaction is in a specific state.
- * State is based on lastTransition given by transaction object and state description.
- *
- * @param {Object} tx transaction entity
- */
+// Utility functions
 const txLastTransition = tx => tx?.attributes?.lastTransition;
-
-/**
- * Get states from the graph.
- *
- * Note: currently we assume that state description is in stateX format
- *       and it doesn't contain nested states.
- *
- * @param {Object} graph Description of transaction process graph in StateX format
- */
 const statesObjectFromGraph = graph => graph.states || {};
 
-/**
- * This is a helper function that's attached to exported 'getProcess'.
- * Get next process state after given transition.
- *
- * @param {Object} process imported from a separate file
- * @returns {function} Returns a function to check the next state after given transition.
- */
 const getStateAfterTransition = process => transition => {
   const statesObj = statesObjectFromGraph(process.graph);
   const stateNames = Object.keys(statesObj);
@@ -90,38 +62,10 @@ const getStateAfterTransition = process => transition => {
     : null;
 };
 
-/**
- * This is a helper function that's attached to exported 'getProcess' as 'getState'
- * Get state based on lastTransition of given transaction entity.
- *
- * How to use this function:
- *   // import { getProcess } from '../../transactions/transaction';
- *   const process = getProcess(processName);
- *   const state = process.getState(tx);
- *   const isInquiry = state === process.states.INQUIRY
- *
- * @param {Object} process imported from a separate file
- * @returns {function} Returns a function to check the current state of transaction entity against
- * given process.
- */
 const getProcessState = process => tx => {
   return getStateAfterTransition(process)(txLastTransition(tx));
 };
 
-/**
- * Pick transition names that lead to target state from given entries.
- *
- * First parameter, "transitionEntries", should look like this:
- * [
- *   [transitionForward1, stateY],
- *   [transitionForward2, stateY],
- *   [transitionForward3, stateZ],
- * ]
- *
- * @param {Array} transitionEntries
- * @param {String} targetState
- * @param {Array} initialTransitions
- */
 const pickTransitionsToTargetState = (transitionEntries, targetState, initialTransitions) => {
   return transitionEntries.reduce((pickedTransitions, transitionEntry) => {
     const [transition, nextState] = transitionEntry;
@@ -129,31 +73,6 @@ const pickTransitionsToTargetState = (transitionEntries, targetState, initialTra
   }, initialTransitions);
 };
 
-/**
- * Get all the transitions that lead to specified state.
- *
- * Process uses following syntax to describe the graph:
- * states: {
- *   stateX: {
- *     on: {
- *       transitionForward1: stateY,
- *       transitionForward2: stateY,
- *       transitionForward3: stateZ,
- *     },
- *   },
- *   stateY: {},
- *   stateZ: {
- *     on: {
- *       transitionForward4: stateY,
- *     },
- *   },
- * },
- *
- * Finding all the transitions to 'stateY' should pick transitions: 1, 2, 4
- *
- * @param {Object} process
- * @param {String} targetState
- */
 const getTransitionsToState = (process, targetState) => {
   const states = Object.values(statesObjectFromGraph(process.graph));
 
@@ -167,24 +86,12 @@ const getTransitionsToState = (process, targetState) => {
   }, []);
 };
 
-/**
- * Transitions that lead to given states.
- *
- * @param {Object} process against which transitions and states are checked.
- * @returns {function} Returns a function to get the transitions that lead to given states.
- */
 const getTransitionsToStates = process => stateNames => {
   return stateNames.reduce((pickedTransitions, stateName) => {
     return [...pickedTransitions, ...getTransitionsToState(process, stateName)];
   }, []);
 };
 
-/**
- * Helper functions to figure out if transaction has passed a given state.
- * This is based on transitions history given by transaction object.
- *
- * @param {Object} process against which passed states are checked.
- */
 const hasPassedState = process => (stateName, tx) => {
   const txTransitions = tx => tx?.attributes?.transitions || [];
   const hasPassedTransition = (transitionName, tx) =>
@@ -195,15 +102,7 @@ const hasPassedState = process => (stateName, tx) => {
   );
 };
 
-/**
- * If process has been renamed, but the graph itself is the same,
- * this function allows referencing the updated name of the process.
- * ProcessName is used in some translation keys and stateData functions.
- *
- * Note: If the process graph has changed, you must create a separate process graph for it.
- *
- * @param {String} processName
- */
+// Used in translation and process name resolution
 export const resolveLatestProcessName = processName => {
   switch (processName) {
     case 'flex-product-default-process':
@@ -217,15 +116,14 @@ export const resolveLatestProcessName = processName => {
       return BOOKING_PROCESS_NAME;
     case INQUIRY_PROCESS_NAME:
       return INQUIRY_PROCESS_NAME;
+    case BIKETRIBE_INQUIRY_PROCESS_NAME:
+      return BIKETRIBE_INQUIRY_PROCESS_NAME;
     default:
       return processName;
   }
 };
 
-/**
- * Get process based on process name
- * @param {String} processName
- */
+// Get process object by name
 export const getProcess = processName => {
   const latestProcessName = resolveLatestProcessName(processName);
   const processInfo = PROCESSES.find(process => process.name === latestProcessName);
@@ -244,84 +142,34 @@ export const getProcess = processName => {
   }
 };
 
-/**
- * Get the info about supported processes: name, alias, unitTypes
- */
+// Utility exports
 export const getSupportedProcessesInfo = () =>
-  PROCESSES.map(p => {
-    const { process, ...rest } = p;
-    return rest;
-  });
+  PROCESSES.map(({ process, ...rest }) => rest);
 
-/**
- * Get all the transitions for every supported process
- */
 export const getAllTransitionsForEveryProcess = () => {
   return PROCESSES.reduce((accTransitions, processInfo) => {
     return [...accTransitions, ...Object.values(processInfo.process.transitions)];
   }, []);
 };
 
-/**
- * Check if the process is purchase process
- *
- * @param {String} processName
- */
-export const isPurchaseProcess = processName => {
-  const latestProcessName = resolveLatestProcessName(processName);
-  const processInfo = PROCESSES.find(process => process.name === latestProcessName);
-  return [PURCHASE_PROCESS_NAME].includes(processInfo?.name);
-};
+export const isPurchaseProcess = processName =>
+  resolveLatestProcessName(processName) === PURCHASE_PROCESS_NAME;
 
-/**
- * Check if the process/alias points to a booking process
- *
- * @param {String} processAlias
- */
-export const isPurchaseProcessAlias = processAlias => {
-  const processName = processAlias ? processAlias.split('/')[0] : null;
-  return processAlias ? isPurchaseProcess(processName) : false;
-};
+export const isPurchaseProcessAlias = processAlias =>
+  isPurchaseProcess(processAlias ? processAlias.split('/')[0] : null);
 
-/**
- * Check if the process is booking process
- *
- * @param {String} processName
- */
-export const isBookingProcess = processName => {
-  const latestProcessName = resolveLatestProcessName(processName);
-  const processInfo = PROCESSES.find(process => process.name === latestProcessName);
-  return [BOOKING_PROCESS_NAME].includes(processInfo?.name);
-};
+export const isBookingProcess = processName =>
+  resolveLatestProcessName(processName) === BOOKING_PROCESS_NAME;
 
-/**
- * Check if the process/alias points to a booking process
- *
- * @param {String} processAlias
- */
-export const isBookingProcessAlias = processAlias => {
-  const processName = processAlias ? processAlias.split('/')[0] : null;
-  return processAlias ? isBookingProcess(processName) : false;
-};
+export const isBookingProcessAlias = processAlias =>
+  isBookingProcess(processAlias ? processAlias.split('/')[0] : null);
 
-/**
- * Check from unit type if full days should be used.
- * E.g. unit type is day or night
- * This is mainly used for availability management.
- *
- * @param {String} unitType
- */
-export const isFullDay = unitType => {
-  return [DAY, NIGHT].includes(unitType);
-};
+export const isFullDay = unitType => [DAY, NIGHT].includes(unitType);
 
-/**
- * Get transitions that need provider's attention for every supported process
- */
 export const getTransitionsNeedingProviderAttention = () => {
   return PROCESSES.reduce((accTransitions, processInfo) => {
     const statesNeedingProviderAttention = Object.values(
-      processInfo.process.statesNeedingProviderAttention
+      processInfo.process.statesNeedingProviderAttention || {}
     );
     const process = processInfo.process;
     const processTransitions = statesNeedingProviderAttention.reduce(
@@ -330,20 +178,11 @@ export const getTransitionsNeedingProviderAttention = () => {
       },
       []
     );
-    // Return only unique transitions names
-    // TODO: this setup is subject to problems if one process has important transition named
-    // similarly as unimportant transition in another process.
     return [...new Set([...accTransitions, ...processTransitions])];
   }, []);
 };
 
-/**
- * Actors
- *
- * There are 4 different actors that might initiate transitions:
- */
-
-// Roles of actors that perform transaction transitions
+// Transition roles
 export const TX_TRANSITION_ACTOR_CUSTOMER = 'customer';
 export const TX_TRANSITION_ACTOR_PROVIDER = 'provider';
 export const TX_TRANSITION_ACTOR_SYSTEM = 'system';
@@ -356,16 +195,10 @@ export const TX_TRANSITION_ACTORS = [
   TX_TRANSITION_ACTOR_OPERATOR,
 ];
 
-/**
- * Get the role of the current user on given transaction entity.
- *
- * @param {UUID} currentUserId UUID of the currentUser entity
- * @param {Object} transaction Transaction entity from Marketplace API
- */
+// Get user role in transaction
 export const getUserTxRole = (currentUserId, transaction) => {
   const customer = transaction?.customer;
-  if (currentUserId && currentUserId.uuid && transaction?.id && customer.id) {
-    // user can be either customer or provider
+  if (currentUserId && currentUserId.uuid && transaction?.id && customer?.id) {
     return currentUserId.uuid === customer.id.uuid
       ? TX_TRANSITION_ACTOR_CUSTOMER
       : TX_TRANSITION_ACTOR_PROVIDER;
@@ -375,27 +208,9 @@ export const getUserTxRole = (currentUserId, transaction) => {
   }
 };
 
-/**
- * Wildcard string for ConditionalResolver's conditions.
- */
+// ConditionalResolver utility
 export const CONDITIONAL_RESOLVER_WILDCARD = '*';
 
-/**
- * This class helps to resolve correct UI data for each combination of conditional data [state & role]
- *
- * Usage:
- *  const stateData = new ConditionalResolver([currentState, currentRole])
- *    .cond(['inquiry', 'customer'], () => {
- *      return { showInfoX: true, isSomethingOn: true };
- *    })
- *    .cond(['purchase', _], () => {
- *      return { showInfoX: false, isSomethingOn: true };
- *    })
- *    .default(() => {
- *      return { showDetailCardHeadings: true };
- *    })
- *    .resolve();
- */
 export class ConditionalResolver {
   constructor(data) {
     this.data = data;
@@ -420,8 +235,6 @@ export class ConditionalResolver {
     return this;
   }
   resolve() {
-    // This resolves the output against current conditions.
-    // Therefore, call for resolve() must be the last call in method chain.
     return this.resolver ? this.resolver() : this.defaultResolver ? this.defaultResolver() : null;
   }
 }
