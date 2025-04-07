@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import PetProfileForm from './PetProfileForm'; // adjust the path if needed
+import PetProfileForm from '../../../components/PetProfile/PetProfileForm'; // adjust the path if needed
 
 import { FormattedMessage, injectIntl, intlShape } from '../../../util/reactIntl';
 import { displayPrice } from '../../../util/configHelpers';
