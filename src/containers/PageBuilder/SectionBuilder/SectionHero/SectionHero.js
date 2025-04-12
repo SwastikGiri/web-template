@@ -1,5 +1,12 @@
 import React from 'react';
 import classNames from 'classnames';
+import { useConfiguration } from '../../../../context/configurationContext';
+import { useRouteConfiguration } from '../../../../context/routeConfigurationContext';
+import { useHistory, useLocation } from 'react-router-dom';
+import { parse } from '../../../../util/urlHelpers';
+import { isMainSearchTypeKeywords, isOriginInUse } from '../../../../util/search';
+import { createResourceLocatorString } from '../../../../util/routes';
+
 
 import Field, { hasDataInFields } from '../../Field';
 
@@ -7,6 +14,7 @@ import SectionContainer from '../SectionContainer';
 import css from './SectionHero.module.css';
 
 import SearchForm from '../../../../components/SearchForm/SearchForm';
+import TopbarSearchForm from '../../../TopbarContainer/Topbar/TopbarSearchForm/TopbarSearchForm-copy';
 /**
  * @typedef {Object} FieldComponentConfig
  * @property {ReactNode} component
@@ -55,6 +63,39 @@ const SectionHero = props => {
   const fieldOptions = { fieldComponents };
 
   const hasHeaderFields = hasDataInFields([title, description, callToAction], fieldOptions);
+  const initialSearchFormValues = {};
+  const config = useConfiguration();
+const routeConfiguration = useRouteConfiguration();
+const history = useHistory();
+const location = useLocation(); // in case you want to access current query
+
+const handleSubmit = values => {
+  const topbarSearchParams = () => {
+    if (isMainSearchTypeKeywords(config)) {
+      return { keywords: values?.keywords };
+    }
+
+    // topbar search defaults to 'location' search
+    const { search, selectedPlace } = values?.location || {};
+    const { origin, bounds } = selectedPlace || {};
+    const originMaybe = isOriginInUse(config) ? { origin } : {};
+
+    return {
+      ...originMaybe,
+      address: search,
+      bounds,
+    };
+  };
+
+  const currentSearchParams = parse(location.search);
+  const searchParams = {
+    ...currentSearchParams,
+    ...topbarSearchParams(),
+  };
+
+  history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
+};
+
 
   return (
     <SectionContainer
@@ -69,7 +110,14 @@ const SectionHero = props => {
           <Field data={title} className={defaultClasses.title} options={fieldOptions} />
           <Field data={description} className={defaultClasses.description} options={fieldOptions} />
           <Field data={callToAction} className={defaultClasses.ctaButton} options={fieldOptions} />
-          <SearchForm/>
+          <div className={css.searchContainer}>
+  <TopbarSearchForm
+    onSubmit={handleSubmit}
+    initialValues={initialSearchFormValues}
+    isMobile={false} // or true if you want mobile styles
+    appConfig={config}
+  />
+</div>
         </header>
       ) : null}
     </SectionContainer>

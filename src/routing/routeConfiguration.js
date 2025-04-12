@@ -9,6 +9,8 @@ import PreviewResolverPage from '../containers/PreviewResolverPage/PreviewResolv
 // Otherwise, components will import form container eventually and
 // at that point css bundling / imports will happen in wrong order.
 import { NamedRedirect } from '../components';
+import TestPetProfileForm from '../components/TestPetProfile/TestPetProfileForm';
+import CreateTestTransaction from '../components/TestPetProfile/CreateTestTransaction';
 
 const pageDataLoadingAPI = getPageDataLoadingAPI();
 
@@ -93,7 +95,21 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       ...authForPrivateMarketplace,
       component: SearchPage,
       loadData: pageDataLoadingAPI.SearchPage.loadData,
-    },
+      extraRouteProps: {
+        search: {
+          queryParamNames: [
+            'address',
+            'bounds',
+            'startDate',
+            'endDate',
+            'pet',
+            'kennel',
+            'petSize',
+            'serviceType',
+          ],
+        },
+      },
+    },    
     {
       path: '/l',
       name: 'ListingBasePage',
@@ -403,6 +419,18 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       name: 'PreviewResolverPage',
       component: PreviewResolverPage ,
     },
+    {
+      path: '/test-pet-profile/:id',
+      name: 'TestPetProfileFormPage',
+      auth: true,
+      component: TestPetProfileForm,
+    },
+    {
+      path: '/create-transaction',
+      name: 'CreateTestTransactionPage',
+      auth: true,
+      component: CreateTestTransaction,
+    },    
   ];
 };
 

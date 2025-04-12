@@ -116,7 +116,7 @@ export const convertCategoriesToSelectTreeOptions = categories => {
  * Check if the main search type is 'keywords'
  */
 export const isMainSearchTypeKeywords = config =>
-  config.search?.mainSearch?.searchType === 'keywords';
+  config?.search?.mainSearch?.searchType === 'keywords' || false;
 
 /**
  * Check if the origin parameter is currently active.

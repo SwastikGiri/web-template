@@ -97,7 +97,7 @@ const LocationSearchField = props => {
 const TopbarSearchForm = props => {
   const searchInpuRef = useRef(null);
   const intl = useIntl();
-  const { appConfig, onSubmit, ...restOfProps } = props;
+  const { appConfig = {}, onSubmit = () => {}, ...restOfProps } = props;
 
   const onChange = location => {
     if (!isMainSearchTypeKeywords(appConfig) && location.selectedPlace) {
