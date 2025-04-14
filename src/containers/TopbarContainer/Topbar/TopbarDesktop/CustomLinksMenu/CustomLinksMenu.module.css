@@ -9,3 +9,13 @@
   justify-content: right;
   height: 100%;
 }
+a{
+  display: flex;
+  align-items: center;
+}
+a span span{
+  padding: 6px 26px 6px;
+  font-weight:600;
+  font-size: medium;
+  color: black;
+}

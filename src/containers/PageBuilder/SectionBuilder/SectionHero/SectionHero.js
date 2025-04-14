@@ -7,7 +7,6 @@ import { parse } from '../../../../util/urlHelpers';
 import { isMainSearchTypeKeywords, isOriginInUse } from '../../../../util/search';
 import { createResourceLocatorString } from '../../../../util/routes';
 
-
 import Field, { hasDataInFields } from '../../Field';
 
 import SectionContainer from '../SectionContainer';
@@ -65,37 +64,41 @@ const SectionHero = props => {
   const hasHeaderFields = hasDataInFields([title, description, callToAction], fieldOptions);
   const initialSearchFormValues = {};
   const config = useConfiguration();
-const routeConfiguration = useRouteConfiguration();
-const history = useHistory();
-const location = useLocation(); // in case you want to access current query
+  const routeConfiguration = useRouteConfiguration();
+  const history = useHistory();
+  const location = useLocation(); // in case you want to access current query
 
-const handleSubmit = values => {
-  const topbarSearchParams = () => {
-    if (isMainSearchTypeKeywords(config)) {
-      return { keywords: values?.keywords };
-    }
+  const handleSubmit = values => {
+    const topbarSearchParams = () => {
+      if (isMainSearchTypeKeywords(config)) {
+        return { keywords: values?.keywords };
+      }
 
-    // topbar search defaults to 'location' search
-    const { search, selectedPlace } = values?.location || {};
-    const { origin, bounds } = selectedPlace || {};
-    const originMaybe = isOriginInUse(config) ? { origin } : {};
+      // topbar search defaults to 'location' search
+      const { search, selectedPlace } = values?.location || {};
+      const { origin, bounds } = selectedPlace || {};
+      const originMaybe = isOriginInUse(config) ? { origin } : {};
 
-    return {
-      ...originMaybe,
-      address: search,
-      bounds,
+      // Add date filters to the query
+      const { start, end } = values || {};
+
+      return {
+        ...originMaybe,
+        address: search,
+        bounds,
+        start, // Add the start to the query
+        end, // Add the end to the query
+      };
     };
+
+    const currentSearchParams = parse(location.search);
+    const searchParams = {
+      ...currentSearchParams,
+      ...topbarSearchParams(),
+    };
+
+    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
   };
-
-  const currentSearchParams = parse(location.search);
-  const searchParams = {
-    ...currentSearchParams,
-    ...topbarSearchParams(),
-  };
-
-  history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
-};
-
 
   return (
     <SectionContainer
@@ -111,13 +114,13 @@ const handleSubmit = values => {
           <Field data={description} className={defaultClasses.description} options={fieldOptions} />
           <Field data={callToAction} className={defaultClasses.ctaButton} options={fieldOptions} />
           <div className={css.searchContainer}>
-  <TopbarSearchForm
-    onSubmit={handleSubmit}
-    initialValues={initialSearchFormValues}
-    isMobile={false} // or true if you want mobile styles
-    appConfig={config}
-  />
-</div>
+            <TopbarSearchForm
+              onSubmit={handleSubmit}
+              initialValues={initialSearchFormValues}
+              isMobile={false} // or true if you want mobile styles
+              appConfig={config}
+            />
+          </div>
         </header>
       ) : null}
     </SectionContainer>

@@ -7,7 +7,6 @@ import { FieldDateRangeController } from '../../../components';
 
 import FilterPlain from '../FilterPlain/FilterPlain';
 import FilterPopup from '../FilterPopup/FilterPopup';
-
 import FilterPopupForSidebar from './FilterPopupForSidebar';
 import css from './BookingDateRangeFilter.module.css';
 

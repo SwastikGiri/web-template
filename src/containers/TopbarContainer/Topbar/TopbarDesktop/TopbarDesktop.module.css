@@ -26,6 +26,8 @@
 
 /* logo */
 .logoLink {
+  display: flex;
+  align-items: center;
   border-bottom: 0px solid;
   transition: var(--transitionStyleButton);
 }
@@ -306,4 +308,7 @@
       background-color: var(--colorBlack);
     }
   }
+}
+.navLinks{
+  display: flex;
 }

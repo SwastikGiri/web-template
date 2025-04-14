@@ -1,0 +1,84 @@
+.root {
+    padding: 2rem;
+  }
+  .container{
+    margin: auto;
+  }
+  input{
+    width: 600px;
+    margin-bottom: 10px;
+  }
+  
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--marketplaceColor);
+  }
+  
+  .petProfile {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .petHeading {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+  
+  .fieldGroup label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .fieldGroup input,
+  .fieldGroup select,
+  .fieldGroup textarea {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  .addButton {
+    float: right;
+    background-color: var(--marketplaceColor);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+  
+.removeButton {
+    float: left;
+    background-color: rgb(255, 0, 0);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  
+  .removeButton:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+  }
+  

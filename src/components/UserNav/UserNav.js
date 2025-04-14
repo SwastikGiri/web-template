@@ -44,6 +44,14 @@ const UserNav = props => {
         name: 'ContactDetailsPage',
       },
     },
+    {
+      text: <FormattedMessage id="UserNav.myPets" />,
+      selected: currentPage === 'MyPetsPage',
+      disabled: false,
+      linkProps: {
+        name: 'MyPetsPage',
+      },
+    },
   ];
 
   return (

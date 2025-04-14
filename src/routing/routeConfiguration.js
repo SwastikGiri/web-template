@@ -11,6 +11,7 @@ import PreviewResolverPage from '../containers/PreviewResolverPage/PreviewResolv
 import { NamedRedirect } from '../components';
 import TestPetProfileForm from '../components/TestPetProfile/TestPetProfileForm';
 import CreateTestTransaction from '../components/TestPetProfile/CreateTestTransaction';
+import MyPetsPage from '../containers/MyPetsPage/MyPetsPage';
 
 const pageDataLoadingAPI = getPageDataLoadingAPI();
 
@@ -430,7 +431,13 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       name: 'CreateTestTransactionPage',
       auth: true,
       component: CreateTestTransaction,
-    },    
+    }, 
+    {
+      path: '/my-pets',
+      name: 'MyPetsPage',
+      auth: true,
+      component: MyPetsPage, // import this at the top
+    },       
   ];
 };
 

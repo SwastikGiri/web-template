@@ -3,7 +3,10 @@ import { Form as FinalForm, Field } from 'react-final-form';
 import classNames from 'classnames';
 import { useIntl } from '../../../../util/reactIntl';
 import { isMainSearchTypeKeywords } from '../../../../util/search';
-
+import small from '../../../../assets/small_dog_7197608.png';
+import medium from '../../../../assets/medium_dogs-allowed.png';
+import large from '../../../../assets/large_ldoge_16147621.png';
+import xlarge from '../../../../assets/xlarge_dog_7174618.png';
 import { Form, LocationAutocompleteInput } from '../../../../components';
 
 import IconSearchDesktop from './IconSearchDesktop';
@@ -68,7 +71,7 @@ const LocationSearchField = props => {
             inputClassName={isMobile ? css.mobileInput : css.desktopInput}
             predictionsClassName={isMobile ? css.mobilePredictions : css.desktopPredictions}
             predictionsAttributionClassName={isMobile ? css.mobilePredictionsAttribution : null}
-            placeholder= "Zip or Address"
+            placeholder="Zip or Address"
             closeOnBlur={!isMobile}
             inputRef={inputRef}
             input={{ ...restInput, onChange: searchOnChange }}
@@ -96,49 +99,102 @@ const LocationSearchField = props => {
 const TopbarSearchForm = props => {
   const searchInpuRef = useRef(null);
   const intl = useIntl();
-  const { appConfig = {}, onSubmit = () => {}, ...restOfProps } = props;
+  const { appConfig = {}, onSubmit = () => {}, initialValues = {}, ...restOfProps } = props;
 
-  const onChange = location => {
-    if (!isMainSearchTypeKeywords(appConfig) && location.selectedPlace) {
-      // Note that we use `onSubmit` instead of the conventional
-      // `handleSubmit` prop for submitting. We want to autosubmit
-      // when a place is selected, and don't require any extra
-      // validations for the form.
-      onSubmit({ location });
-      // blur search input to hide software keyboard
-      searchInpuRef?.current?.blur();
-    }
-  };
-
-  const onKeywordSubmit = values => {
-    if (isMainSearchTypeKeywords(appConfig)) {
-      onSubmit({ keywords: values.keywords });
-      // blur search input to hide software keyboard
-      searchInpuRef?.current?.blur();
-    }
-  };
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [start, setStart] = useState(initialValues.start || '');
+  const [end, setEnd] = useState(initialValues.end || '');
   const [selectedPet, setSelectedPet] = useState(null);
   const [selectedKennel, setSelectedKennel] = useState(null);
   const [selectedPetSize, setSelectedPetSize] = useState(null);
   const [selectedServiceType, setSelectedServiceType] = useState(null);
-  const [redirectParams, setRedirectParams] = useState(null);
   const [location, setLocation] = useState(null);
+  const [errors, setErrors] = useState({ location: '', start: '', end: '' });
 
   const handlePetClick = pet => setSelectedPet(pet);
   const handleKennelClick = kennel => setSelectedKennel(kennel);
   const handlePetSizeClick = size => setSelectedPetSize(size);
   const handleServiceTypeClick = service => setSelectedServiceType(service);
-  const handleLocationChange = value => setLocation(value);
-
+  const handleLocationChange = value => {
+    setLocation(value);
+    setErrors(prev => ({ ...prev, location: '' })); // Reset location error
+  };
+    // Helper function (keep this outside your component or above)
+    const formatForInput = (isoString) => {
+      if (!isoString) return ''; // Prevent crash if isoString is null/undefined
+    
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return ''; // Prevent crash if date is invalid
+    
+      const offset = date.getTimezoneOffset();
+      const localDate = new Date(date.getTime() - offset * 60 * 1000);
+      return localDate.toISOString().slice(0, 16); // "yyyy-MM-ddTHH:mm"
+    };
+    const handleStartChange = (e) => {
+      const localStartDate = e.target.value; // e.g., from input type="datetime-local"
+      const startDateISO = new Date(localStartDate).toISOString(); // Convert to ISO format
+      const formattedForInput = formatForInput(startDateISO); // Optional, for UI binding if needed
+      setStart(startDateISO); // Store in ISO format for API use
+      setErrors(prev => ({ ...prev, start: '' })); // Reset start error
+    };
+  const handleEndChange = e => {
+    const localEndDate = e.target.value;
+    const endDateISO = new Date(localEndDate).toISOString();
+    const formattedInput = formatForInput(endDateISO);
+    setEnd(endDateISO);
+    setErrors(prev => ({ ...prev, end: '' }));
+  };
+  
   const isSelected = (item, selected) => (selected === item ? css.selected : '');
   const isKeywordsSearch = isMainSearchTypeKeywords(appConfig);
-  const submit = isKeywordsSearch ? onKeywordSubmit : onSubmit;
+
+  const handleSearchClick = () => {
+    let formErrors = {};
+
+    if (!location) formErrors.location = '*This field is required.';
+    if (!start) formErrors.start = '*This field is required.';
+    if (!end) formErrors.end = '*This field is required.';
+
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return; // Prevent form submission if there are errors
+    }
+    if (Object.keys(errors).length === 0) {
+      const minDurationMinutes = Math.floor((end - start) / (1000 * 60));
+      const queryParams = {
+        address: location,
+        bounds: locationBounds, // if you're using bounds from geolocation
+        start,
+        end,
+        availability: 'time-partial',
+        minDuration:minDurationMinutes,
+      };
+
+      props.onSubmit(queryParams);
+    }
+
+    // Submit form logic
+    onSubmit({
+      location,
+      ...initialValues,
+      start,
+      end,
+      selectedPet,
+      selectedKennel,
+      selectedPetSize,
+      selectedServiceType,
+    });
+  };
+
+  // Define a local onSubmit function for FinalForm if it's not passed
+  const localOnSubmit = values => {
+    console.log('Form submitted with values:', values);
+    handleSearchClick();
+  };
+
   return (
     <FinalForm
       {...restOfProps}
-      onSubmit={submit}
+      onSubmit={localOnSubmit} // Ensure onSubmit is provided
       render={formRenderProps => {
         const {
           rootClassName,
@@ -150,10 +206,6 @@ const TopbarSearchForm = props => {
         const classes = classNames(rootClassName, className);
         const desktopInputRootClass = desktopInputRoot || css.desktopInputRoot;
 
-        // Location search: allow form submit only when the place has changed
-        const preventFormSubmit = e => e.preventDefault();
-        const submitFormFn = isKeywordsSearch ? handleSubmit : preventFormSubmit;
-
         const keywordSearchWrapperClasses = classNames(
           css.keywordSearchWrapper,
           isMobile ? css.mobileInputRoot : desktopInputRootClass
@@ -162,8 +214,7 @@ const TopbarSearchForm = props => {
         return (
           <Form
             className={`${classes} ${css.searchForm}`}
-            onSubmit={submitFormFn}
-            enforcePagePreloadFor="SearchPage"
+            onSubmit={e => e.preventDefault()} // Prevent the default form submit
           >
             <div className={css.FilterContainer}>
               <div className={css.petFilter}>
@@ -177,7 +228,7 @@ const TopbarSearchForm = props => {
                 <button
                   type="button"
                   onClick={() => handlePetClick('Cat')}
-                  className={`${css.filters} ${isSelected('Cat', selectedPet)}`}
+                  className={`${css.filters} ${isSelected('Cat', selectedPet)} ${css.catbtn}`}
                 >
                   Cat
                 </button>
@@ -214,29 +265,36 @@ const TopbarSearchForm = props => {
                       intl={intl}
                       isMobile={isMobile}
                       inputRef={searchInpuRef}
-                      onLocationChange={onChange}
+                      onLocationChange={handleLocationChange} // Update location when changed
                     />
+                  )}
+                  {errors.location && (
+                    <div style={{ marginTop: '4px' }} className={css.errorMessage}>
+                      {errors.location}
+                    </div>
                   )}
                 </div>
                 <div className={css.dateField}>
                   <input
-                    type="date"
-                    value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
+                    type="datetime-local"
+                    value={formatForInput(start)}
+                    onChange={e => handleStartChange(e)}
                     className={css.dateInput}
                   />
-                  <span className={css.placeholder}>Choose Start Date</span>
+                  <span className={css.placeholder}>Check In</span>
+                  {errors.start && <div className={css.errorMessage}>{errors.start}</div>}
                 </div>
 
                 <div className={css.dateField}>
                   <input
-                    type="date"
-                    value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
+                    type="datetime-local"
+                    value={formatForInput(end)}
+                    onChange={e => handleEndChange(e)}
                     className={css.dateInput}
-                    min={startDate}
+                    min={start}
                   />
-                  <span className={css.placeholder}>Choose End Date</span>
+                  <span className={css.placeholder}>Check Out</span>
+                  {errors.end && <div className={css.errorMessage}>{errors.end}</div>}
                 </div>
               </div>
 
@@ -259,18 +317,28 @@ const TopbarSearchForm = props => {
 
               <div className={css.subFormSection}>
                 <div className={css.petSize}>
-                  {['Small', 'Medium', 'Large', 'Extra Large'].map(size => (
+                  {[
+                    { label: 'Small', icon: small },
+                    { label: 'Medium', icon: medium },
+                    { label: 'Large', icon: large },
+                    { label: 'Extra Large', icon: xlarge },
+                  ].map(size => (
                     <button
-                      key={size}
+                      key={size.label}
                       type="button"
-                      onClick={() => handlePetSizeClick(size)}
-                      className={`${css.btn} ${isSelected(size, selectedPetSize)}`}
+                      onClick={() => handlePetSizeClick(size.label)}
+                      className={`${css.btn} ${isSelected(size.label, selectedPetSize)}`}
                     >
-                      {size}
+                      <img src={size.icon} alt={size.label} className={css.dogIcon} />
+                      {size.label}
                     </button>
                   ))}
                 </div>
-                <input type="submit" value="Search" className={css.searchbtn} />
+
+                {/* Search Button */}
+                <button type="button" onClick={handleSearchClick} className={css.searchbtn}>
+                  Search
+                </button>
               </div>
             </div>
           </Form>

@@ -5,7 +5,7 @@
 }
 
 .desktopInputRoot {
-  height: var(--topbarHeightDesktop);
+  height: var(--topbarHeightDesktopSearch);
 }
 
 .mobileIcon {
@@ -26,7 +26,7 @@
   font-weight: var(--fontWeightBlack);
   font-size: 24px;
   line-height: 24px;
-
+  
   /* Layout */
   margin: 0 24px 0 0;
   padding: 4px 13px 10px 13px;
@@ -65,7 +65,7 @@
 }
 
 .desktopIcon {
-  height: var(--topbarHeightDesktop);
+  height: var(--topbarHeightDesktopSearch);
   border: none;
   padding-top: 2px;
 
@@ -79,7 +79,7 @@
   composes: p from global;
   flex-grow: 1;
   /* Font */
-  height: var(--topbarHeightDesktop);
+  height: var(--topbarHeightDesktopSearch);
   line-height: unset;
   border: none;
   padding-top: 0px;
@@ -151,9 +151,9 @@
 .desktopPredictions {
   position: absolute;
   width: 100%;
-  top: var(--topbarHeightDesktop);
+  top: var(--topbarHeightDesktopSearch);
   left: 0;
-  background-color: var(--marketplaceColor);
+  background-color: white;
   border-bottom-left-radius: var(--borderRadius);
   border-bottom-right-radius: var(--borderRadius);
   box-shadow: var(--boxShadowPopup);
@@ -207,127 +207,186 @@
   }
 }
 .searchForm {
-    margin-top: 80px;
-    width: 780px;
-  }
-    
+  margin-top: 30px;
+  width: 1000px;
+}
 .subForm {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 240px;
-    background-color: aliceblue;
-    padding: 20px;
-    border: 0px solid;
-    border-radius: 0px 0px 20px 20px;
-  }
-  .FilterContainer {
-    display: flex;
-    justify-content: space-between;
-  }
-  .filters {
-    border: 0px solid;
-    border-radius: 10px 10px 0px 0px;
-    background-color: white;
-    font-size: medium;
-    font-weight: normal;
-    color: var(--marketplaceColor);
-    padding: 6px 26px 6px;
-  }
-  .btn.selected,
-  .filters.selected {
-    background-color: var(--marketplaceColor) !important;
-    color: white !important;
-  }
-  .inputFields {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .addressInput {
-    border: 1px solid var(--marketplaceColor);
-    height: 74px;
-    border-radius: 10px;
-    width: 360px;
-  }
-  .addressInput div{
-    border-radius: 10px 0px 0px 10px;
-  }
-  .addressInput input{
-    font-size: large;
-    border-radius: 0px 10px 10px 0px;
-  }
-  .addressInput svg{
-    display: none;
-  }
-  .dateField {
-    position: relative;
-    width: 160px;
-  }
-  .dateInput {
-    height: 70px;
-    width: 100%;
-    padding: 18px 8px 2px;
-    font-size: 17px;
-    border: 1px solid var(--marketplaceColor);
-    border-radius: 12px;
-    background-color: white;
-    color: #000000;
-    position: relative;
-    z-index: 0;
-  }
-  
-  .placeholder {
-    position: absolute;
-    top: 6px;
-    left: 10px;
-    color: #ababab;
-    font-size: 15px;
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .btn {
-    background-color: white;
-    color: var(--marketplaceColor);
-    font-size: medium;
-    font-weight: normal;
-    padding: 2px 20px 2px;
-    border: 0px solid;
-    border-radius: 10px;
-    height: 40px;
-    width: 130px;
-  }
-  .searchbtn {
-    width: 180px;
-    height: 60px;
-    padding: 0px;
-    border-radius: 30px;
-    color: white;
-    background-color: orange;
-    font-weight: bold;
-  }
-  .searchbtn:hover {
-    background-color: #ff7a26;
-  }
-  
-  .searchbtn:active,
-  .searchbtn:focus {
-    background-color: #e0661a;
-  }
-  .serviceType {
-    display: flex;
-    gap: 10px;
-  }
-  .subFormSection {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .petSize {
-    display: flex;
-    gap: 10px;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 260px;
+  background-color: white;
+  padding: 25px;
+  border: 0px solid;
+  border-radius: 0px 0px 20px 20px;
+  -webkit-box-shadow: 0px 7px 30px 1px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 7px 30px 1px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 7px 30px 1px rgba(0, 0, 0, 0.75);
+}
+.FilterContainer {
+  display: flex;
+  justify-content: space-between;
+}
+.filters {
+  border-radius: 10px 10px 0px 0px;
+  background-color: white;
+  font-size: large;
+  font-weight: normal;
+  color: var(--marketplaceColor);
+  padding: 6px 26px 6px;
+  transition: color 0.2s ease;
+}
+.btn.selected,
+.filters.selected {
+  background-color: var(--marketplaceColor) !important;
+  color: white !important;
+}
+.inputFields {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 13px;
+}
+.addressInput {
+  border: 1px solid var(--marketplaceColor);
+  height: 75px;
+  border-radius: 15px;
+  width: 450px;
+  min-width: 300px;
+  position: relative;
+  bottom: 5px;
+  transition: color 0.2s ease;
+}
+.addressInput:hover {
+  border: 1px solid #ababab;
+}
+.addressInput div {
+  border-radius: 15px 0px 0px 15px;
+}
+.addressInput input {
+  font-size: x-large;
+  border-radius: 0px 15px 15px 0px;
+}
+.addressInput svg {
+  display: none;
+}
+.dateField {
+  position: relative;
+  width: 25%;
+}
+.dateInput {
+  height: 75px;
+  width: 100%;
+  padding: 18px 8px 2px;
+  font-size: x-large;
+  border: 1px solid var(--marketplaceColor);
+  border-radius: 15px;
+  background-color: white;
+  color: #000000;
+  position: relative;
+  z-index: 0;
+  transition: color 0.2s ease;
+}
+
+.placeholder {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  color: #ababab;
+  font-size: large;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: var(--marketplaceColor);
+  font-size: large;
+  font-weight: normal;
+  padding: 2px 20px 2px;
+  border-radius: 15px;
+  height: 40px;
+  width: 170px;
+  transition: color 0.2s ease;
+}
+button {
+  border: 1px solid var(--marketplaceColor);
+}
+button:hover {
+  background-color: var(--marketplaceColor);
+  color: white;
+}
+.catbtn {
+  color: gray;
+  transition: color 0.2s ease;
+}
+
+.catbtn:hover {
+  background-color: #ababab;
+  color: white;
+}
+.searchbtn {
+  width: 220px;
+  height: 65px;
+  padding: 0px;
+  border: none;
+  border-radius: 30px;
+  color: white;
+  background-color: #ff9900;
+  font-weight: bold;
+  font-size: x-large;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+.searchbtn:hover{
+  background-color: #ff9900;
+  -webkit-box-shadow: 0px 3px 13px -3px rgba(0,0,0,0.75);
+-moz-box-shadow: 0px 3px 13px -3px rgba(0,0,0,0.75);
+box-shadow: 0px 3px 13px -3px rgba(0,0,0,0.75);
+}
+.serviceType {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+.subFormSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.petSize {
+  display: flex;
+  gap: 10px;
+}
+.petSize button{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.dogIcon {
+  position: absolute;
+  left: 4px;
+  width: 35px;
+  height: 35px;
+  /* vertical-align: middle; */
+}
+.errorMessage {
+  align-items: flex-start;
+  position: absolute;
+  margin-top: -8px;
+  color: red;
+  font-size: 12px;
+}
+input{
+  width: 100%;
+}
 input:focus,
 select:focus,
 textarea:focus,

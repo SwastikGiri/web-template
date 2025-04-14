@@ -20,12 +20,12 @@
 }
 
 .sectionContent {
-  padding: 32px 0;
+  padding: 20px 0;
   position: relative;
   word-break: break-word;
 
   @media (--viewportMedium) {
-    padding: 64px 0;
+    padding: 20px 0;
   }
 }
 

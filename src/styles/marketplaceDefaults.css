@@ -54,7 +54,7 @@
   --marketplaceColor: #5d2bc0; /* hsl(260, 63%, 46%) */
   --marketplaceColorLight: #7748d5; /* hsl(260, 63%, 56%), +10L from marketplaceColor */
   --marketplaceColorDark: #492296; /* hsl(260, 63%, 26%), -10L from marketplaceColor */
-
+  --ctabtn: #ff9900;
   /** 
    * The fill color used by <PrimaryButton>
    * These might be overwritten by values from hosted assets
@@ -133,7 +133,9 @@
   /* ================ Topbar related ================ */
 
   --topbarHeight: 60px;
-  --topbarHeightDesktop: 72px;
+  --topbarHeightSearch: 60px;
+  --topbarHeightDesktop: 76px;
+  --topbarHeightDesktopSearch: 72px;
 
   --TopbarMobileMenu_topMargin: 96px;
 

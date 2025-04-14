@@ -95,6 +95,15 @@ const ProfileMenu = ({ currentPage, currentUser, onLogout }) => {
             <FormattedMessage id="TopbarDesktop.accountSettingsLink" />
           </NamedLink>
         </MenuItem>
+        <MenuItem key="MyPetsPage">
+          <NamedLink
+            className={classNames(css.menuLink, currentPageClass('MyPetsPage'))}
+            name="MyPetsPage"
+          >
+            <span className={css.menuItemBorder} />
+            <FormattedMessage id="TopbarDesktop.myPets" />
+          </NamedLink>
+        </MenuItem>
         <MenuItem key="logout">
           <InlineTextButton rootClassName={css.logoutButton} onClick={onLogout}>
             <span className={css.menuItemBorder} />
@@ -194,8 +203,8 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
         linkToExternalSite={config?.topbar?.logoLink}
       />
-      {searchFormMaybe}
-
+      {/* {searchFormMaybe} */}
+      <div className={css.navLinks}>
       <CustomLinksMenu
         currentPage={currentPage}
         customLinks={customLinks}
@@ -207,6 +216,7 @@ const TopbarDesktop = props => {
       {profileMenuMaybe}
       {signupLinkMaybe}
       {loginLinkMaybe}
+      </div>
     </nav>
   );
 };
