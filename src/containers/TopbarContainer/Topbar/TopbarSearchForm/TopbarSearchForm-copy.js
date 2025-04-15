@@ -303,7 +303,7 @@ const TopbarSearchForm = props => {
                   </div>
 
                   <input
-                    type="datetime-local"
+                    type="date"
                     ref={startInputRef}
                     min={formatForInput(new Date().toISOString())}
                     value={formatForInput(start)}
@@ -326,7 +326,7 @@ const TopbarSearchForm = props => {
                   </div>
 
                   <input
-                    type="datetime-local"
+                    type="date"
                     value={formatForInput(end)}
                     ref={endInputRef}
                     onChange={e => handleEndChange(e)}
