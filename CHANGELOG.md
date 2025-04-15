@@ -14,6 +14,13 @@ way to update this template, but currently, we follow a pattern:
 
 ## Upcoming version 2025-XX-XX
 
+- [change] update deeply nested dependency: path-to-regexp
+  [#580](https://github.com/sharetribe/web-template/pull/580)
+- [fix] SectionDetails (ListingPage & ProfilePage): fix line-height and padding for the details row.
+  [#576](https://github.com/sharetribe/web-template/pull/576)
+- [fix] OrderPanel: purchase and inquiries did not check closed status of the listing.
+  [#573](https://github.com/sharetribe/web-template/pull/573)
+
 ## [v8.0.1] 2025-04-03
 
 - [add] Add currently available translations for FR.
