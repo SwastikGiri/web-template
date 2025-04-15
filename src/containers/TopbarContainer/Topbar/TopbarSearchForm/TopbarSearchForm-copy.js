@@ -109,6 +109,9 @@ const TopbarSearchForm = props => {
   const [selectedServiceType, setSelectedServiceType] = useState(null);
   const [location, setLocation] = useState(null);
   const [errors, setErrors] = useState({ location: '', start: '', end: '' });
+  const startInputRef = useRef(null); // Add at top of your component
+  const endInputRef = useRef(null); // Add at top of your component
+
 
   const handlePetClick = pet => setSelectedPet(pet);
   const handleKennelClick = kennel => setSelectedKennel(kennel);
@@ -118,24 +121,24 @@ const TopbarSearchForm = props => {
     setLocation(value);
     setErrors(prev => ({ ...prev, location: '' })); // Reset location error
   };
-    // Helper function (keep this outside your component or above)
-    const formatForInput = (isoString) => {
-      if (!isoString) return ''; // Prevent crash if isoString is null/undefined
-    
-      const date = new Date(isoString);
-      if (isNaN(date.getTime())) return ''; // Prevent crash if date is invalid
-    
-      const offset = date.getTimezoneOffset();
-      const localDate = new Date(date.getTime() - offset * 60 * 1000);
-      return localDate.toISOString().slice(0, 16); // "yyyy-MM-ddTHH:mm"
-    };
-    const handleStartChange = (e) => {
-      const localStartDate = e.target.value; // e.g., from input type="datetime-local"
-      const startDateISO = new Date(localStartDate).toISOString(); // Convert to ISO format
-      const formattedForInput = formatForInput(startDateISO); // Optional, for UI binding if needed
-      setStart(startDateISO); // Store in ISO format for API use
-      setErrors(prev => ({ ...prev, start: '' })); // Reset start error
-    };
+  // Helper function (keep this outside your component or above)
+  const formatForInput = isoString => {
+    if (!isoString) return ''; // Prevent crash if isoString is null/undefined
+
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return ''; // Prevent crash if date is invalid
+
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16); // "yyyy-MM-ddTHH:mm"
+  };
+  const handleStartChange = e => {
+    const localStartDate = e.target.value; // e.g., from input type="datetime-local"
+    const startDateISO = new Date(localStartDate).toISOString(); // Convert to ISO format
+    const formattedForInput = formatForInput(startDateISO); // Optional, for UI binding if needed
+    setStart(startDateISO); // Store in ISO format for API use
+    setErrors(prev => ({ ...prev, start: '' })); // Reset start error
+  };
   const handleEndChange = e => {
     const localEndDate = e.target.value;
     const endDateISO = new Date(localEndDate).toISOString();
@@ -143,9 +146,16 @@ const TopbarSearchForm = props => {
     setEnd(endDateISO);
     setErrors(prev => ({ ...prev, end: '' }));
   };
-  
+
   const isSelected = (item, selected) => (selected === item ? css.selected : '');
   const isKeywordsSearch = isMainSearchTypeKeywords(appConfig);
+  const formatDisplayDate = date => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${month}-${day}-${year}`;
+  };
 
   const handleSearchClick = () => {
     let formErrors = {};
@@ -166,7 +176,7 @@ const TopbarSearchForm = props => {
         start,
         end,
         availability: 'time-partial',
-        minDuration:minDurationMinutes,
+        minDuration: minDurationMinutes,
       };
 
       props.onSubmit(queryParams);
@@ -275,25 +285,43 @@ const TopbarSearchForm = props => {
                   )}
                 </div>
                 <div className={css.dateField}>
+                  <div className={css.fakeDateInput}
+                  onClick={() => startInputRef.current && startInputRef.current.showPicker()}>
+                    <div className={css.fakeDateLabel}>Check In</div>
+                    <div>{start ? formatDisplayDate(start) : 'MM-DD-YYYY'}</div>
+                    <div className={css.fakeDateLabel}>Choose Start Date</div>
+                    <span className={css.calendarIcon}>📅</span>
+                  </div>
+
                   <input
                     type="datetime-local"
+                    ref={startInputRef}
                     value={formatForInput(start)}
                     onChange={e => handleStartChange(e)}
-                    className={css.dateInput}
+                    className={css.hiddenDateInput}
                   />
-                  <span className={css.placeholder}>Check In</span>
+
                   {errors.start && <div className={css.errorMessage}>{errors.start}</div>}
                 </div>
 
                 <div className={css.dateField}>
+                  <div className={css.fakeDateInput}
+                  onClick={() => endInputRef.current && endInputRef.current.showPicker()}>
+                    <div className={css.fakeDateLabel}>Check Out</div>
+                    <div>{end ? formatDisplayDate(end) : 'MM-DD-YYYY'}</div>
+                    <div className={css.fakeDateLabel}>Choose End Date</div>
+                    <span className={css.calendarIcon}>📅</span>
+                  </div>
+
                   <input
                     type="datetime-local"
                     value={formatForInput(end)}
+                    ref={endInputRef}
                     onChange={e => handleEndChange(e)}
-                    className={css.dateInput}
-                    min={start}
+                    className={css.hiddenDateInput}
+                    min={start ? formatForInput(start) : undefined}
                   />
-                  <span className={css.placeholder}>Check Out</span>
+
                   {errors.end && <div className={css.errorMessage}>{errors.end}</div>}
                 </div>
               </div>

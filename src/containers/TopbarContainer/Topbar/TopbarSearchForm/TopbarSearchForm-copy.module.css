@@ -384,6 +384,61 @@ box-shadow: 0px 3px 13px -3px rgba(0,0,0,0.75);
   color: red;
   font-size: 12px;
 }
+.fakeDateInput {
+  height: 75px;
+  width: 100%;
+  padding: 6px 8px 0px 8px;
+  font-size: x-large;
+  border: 1px solid var(--marketplaceColor);
+  border-radius: 15px;
+  background-color: white;
+  color: #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  bottom: 5px;
+  z-index: 3;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.fakeDateInput:hover {
+  border-color: gray;
+}
+
+.fakeDateLabel {
+  color: gray;
+  font-size: medium;
+  margin-bottom: 4px;
+  transition: color 0.2s ease;
+}
+
+.fakeDateInput:hover .fakeDateLabel {
+  color: black;
+}
+
+.calendarIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: gray;
+  pointer-events: none;
+}
+
+.hiddenDateInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 75px;
+  width: 100%;
+  opacity: 0;
+  pointer-events: auto;
+  z-index: 2;
+}
+
 input{
   width: 100%;
 }

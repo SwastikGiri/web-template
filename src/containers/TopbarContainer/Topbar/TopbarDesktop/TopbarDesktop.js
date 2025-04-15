@@ -205,12 +205,13 @@ const TopbarDesktop = props => {
       />
       {/* {searchFormMaybe} */}
       <div className={css.navLinks}>
+      {!isAuthenticated && 
       <CustomLinksMenu
         currentPage={currentPage}
         customLinks={customLinks}
         intl={intl}
         hasClientSideContentReady={authenticatedOnClientSide || !isAuthenticatedOrJustHydrated}
-      />
+      />}
 
       {inboxLinkMaybe}
       {profileMenuMaybe}
