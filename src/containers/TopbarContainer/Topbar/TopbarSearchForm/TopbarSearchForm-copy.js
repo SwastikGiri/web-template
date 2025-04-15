@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Form as FinalForm, Field } from 'react-final-form';
 import classNames from 'classnames';
 import { useIntl } from '../../../../util/reactIntl';
@@ -105,17 +105,23 @@ const TopbarSearchForm = props => {
   const [end, setEnd] = useState(initialValues.end || '');
   const [selectedPet, setSelectedPet] = useState(null);
   const [selectedKennel, setSelectedKennel] = useState(null);
-  const [selectedPetSize, setSelectedPetSize] = useState(null);
+  const [selectedPetSize, setSelectedPetSize] = useState(initialValues.selectedPetSize || null);
   const [selectedServiceType, setSelectedServiceType] = useState(null);
   const [location, setLocation] = useState(null);
-  const [errors, setErrors] = useState({ location: '', start: '', end: '' });
+  const [errors, setErrors] = useState({ location: '', start: '', end: '', selectedPetSize: '' });
   const startInputRef = useRef(null); // Add at top of your component
   const endInputRef = useRef(null); // Add at top of your component
-
+  const [minDuration, setMinDuration] = useState(0);
+  const [availability, setAvailability] = useState('time-partial');
+  const [pub_Dog_Size, setPubDogSize] = useState('');
 
   const handlePetClick = pet => setSelectedPet(pet);
   const handleKennelClick = kennel => setSelectedKennel(kennel);
-  const handlePetSizeClick = size => setSelectedPetSize(size);
+  const handlePetSizeChange = value => {
+    setSelectedPetSize(prev => (prev === value ? null : value));
+    setErrors(prev => ({ ...prev, selectedPetSize: '' }));
+  };
+
   const handleServiceTypeClick = service => setSelectedServiceType(service);
   const handleLocationChange = value => {
     setLocation(value);
@@ -135,14 +141,12 @@ const TopbarSearchForm = props => {
   const handleStartChange = e => {
     const localStartDate = e.target.value; // e.g., from input type="datetime-local"
     const startDateISO = new Date(localStartDate).toISOString(); // Convert to ISO format
-    const formattedForInput = formatForInput(startDateISO); // Optional, for UI binding if needed
     setStart(startDateISO); // Store in ISO format for API use
     setErrors(prev => ({ ...prev, start: '' })); // Reset start error
   };
   const handleEndChange = e => {
     const localEndDate = e.target.value;
     const endDateISO = new Date(localEndDate).toISOString();
-    const formattedInput = formatForInput(endDateISO);
     setEnd(endDateISO);
     setErrors(prev => ({ ...prev, end: '' }));
   };
@@ -156,43 +160,39 @@ const TopbarSearchForm = props => {
     const year = d.getFullYear();
     return `${month}-${day}-${year}`;
   };
-
+  const calculateMinDuration = (start, end) => {
+    if (start && end) {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const duration = Math.floor((endDate - startDate) / (1000 * 60));
+      setMinDuration(duration);
+    }
+  };
+  
   const handleSearchClick = () => {
     let formErrors = {};
 
     if (!location) formErrors.location = '*This field is required.';
     if (!start) formErrors.start = '*This field is required.';
     if (!end) formErrors.end = '*This field is required.';
+    if (!selectedPetSize) formErrors.selectedPetSize = '*This field is required';
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      return; // Prevent form submission if there are errors
+      return; 
     }
-    if (Object.keys(errors).length === 0) {
-      const minDurationMinutes = Math.floor((end - start) / (1000 * 60));
-      const queryParams = {
-        address: location,
-        bounds: locationBounds, // if you're using bounds from geolocation
+    if (Object.keys(formErrors).length === 0) {
+          // Submit form logic
+      props.onSubmit({
+        location,
+        ...initialValues,
         start,
         end,
-        availability: 'time-partial',
-        minDuration: minDurationMinutes,
-      };
-
-      props.onSubmit(queryParams);
+        availability,
+        minDuration,
+        pub_Dog_Size,
+      });
     }
-
-    // Submit form logic
-    onSubmit({
-      location,
-      ...initialValues,
-      start,
-      end,
-      selectedPet,
-      selectedKennel,
-      selectedPetSize,
-      selectedServiceType,
-    });
   };
 
   // Define a local onSubmit function for FinalForm if it's not passed
@@ -200,7 +200,14 @@ const TopbarSearchForm = props => {
     console.log('Form submitted with values:', values);
     handleSearchClick();
   };
-
+  useEffect(() => {
+    calculateMinDuration(start, end);
+  }, [start, end]);
+  useEffect(() => {
+    if (selectedPetSize) {
+      setPubDogSize(`has_all:${selectedPetSize}`);
+    }
+  }, [selectedPetSize]);
   return (
     <FinalForm
       {...restOfProps}
@@ -279,14 +286,16 @@ const TopbarSearchForm = props => {
                     />
                   )}
                   {errors.location && (
-                    <div style={{ marginTop: '4px' }} className={css.errorMessage}>
+                    <div style={{ marginTop: '-1px' }} className={css.errorMessage}>
                       {errors.location}
                     </div>
                   )}
                 </div>
                 <div className={css.dateField}>
-                  <div className={css.fakeDateInput}
-                  onClick={() => startInputRef.current && startInputRef.current.showPicker()}>
+                  <div
+                    className={css.fakeDateInput}
+                    onClick={() => startInputRef.current && startInputRef.current.showPicker()}
+                  >
                     <div className={css.fakeDateLabel}>Check In</div>
                     <div>{start ? formatDisplayDate(start) : 'MM-DD-YYYY'}</div>
                     <div className={css.fakeDateLabel}>Choose Start Date</div>
@@ -296,6 +305,7 @@ const TopbarSearchForm = props => {
                   <input
                     type="datetime-local"
                     ref={startInputRef}
+                    min={formatForInput(new Date().toISOString())}
                     value={formatForInput(start)}
                     onChange={e => handleStartChange(e)}
                     className={css.hiddenDateInput}
@@ -305,8 +315,10 @@ const TopbarSearchForm = props => {
                 </div>
 
                 <div className={css.dateField}>
-                  <div className={css.fakeDateInput}
-                  onClick={() => endInputRef.current && endInputRef.current.showPicker()}>
+                  <div
+                    className={css.fakeDateInput}
+                    onClick={() => endInputRef.current && endInputRef.current.showPicker()}
+                  >
                     <div className={css.fakeDateLabel}>Check Out</div>
                     <div>{end ? formatDisplayDate(end) : 'MM-DD-YYYY'}</div>
                     <div className={css.fakeDateLabel}>Choose End Date</div>
@@ -344,23 +356,29 @@ const TopbarSearchForm = props => {
               </div>
 
               <div className={css.subFormSection}>
-                <div className={css.petSize}>
-                  {[
-                    { label: 'Small', icon: small },
-                    { label: 'Medium', icon: medium },
-                    { label: 'Large', icon: large },
-                    { label: 'Extra Large', icon: xlarge },
-                  ].map(size => (
-                    <button
-                      key={size.label}
-                      type="button"
-                      onClick={() => handlePetSizeClick(size.label)}
-                      className={`${css.btn} ${isSelected(size.label, selectedPetSize)}`}
-                    >
-                      <img src={size.icon} alt={size.label} className={css.dogIcon} />
-                      {size.label}
-                    </button>
-                  ))}
+                <div>
+                  <div className={css.petSize}>
+                    {[
+                      { label: 'Small', value: 'Dog_use1' },
+                      { label: 'Medium', value: 'Dog_use2' },
+                      { label: 'Large', value: 'Dog_use3' },
+                      { label: 'Extra Large', value: 'Dog_use4' }, // if needed
+                    ].map(size => (
+                      <button
+                        key={size.label}
+                        type="button"
+                        onClick={() => handlePetSizeChange(size.value)}
+                        className={`${css.btn} ${
+                          selectedPetSize === size.value ? css.selected : ''
+                        }`}
+                      >
+                        {size.label}
+                      </button>
+                    ))}
+                  </div>
+                  {errors.selectedPetSize && (
+                    <div className={css.errorMessage}>{errors.selectedPetSize}</div>
+                  )}
                 </div>
 
                 {/* Search Button */}

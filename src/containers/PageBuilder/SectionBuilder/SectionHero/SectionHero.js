@@ -80,14 +80,17 @@ const SectionHero = props => {
       const originMaybe = isOriginInUse(config) ? { origin } : {};
 
       // Add date filters to the query
-      const { start, end } = values || {};
+      const { start, end, availability, pub_Dog_Size, minDuration } = values || {};
 
       return {
         ...originMaybe,
         address: search,
         bounds,
-        start, // Add the start to the query
-        end, // Add the end to the query
+        // start, // Add the start to the query
+        // end, // Add the end to the query
+        // availability,
+        pub_Dog_Size,
+        // minDuration,
       };
     };
 
